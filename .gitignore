@@ -1,0 +1,29 @@
+# --- Python Environments ---
+
+venv/
+.venv/
+env/
+*.pyc
+__pycache__/
+
+
+
+# --- OS Junk ---
+
+.DS_Store
+Thumbs.db
+
+
+
+# --- Security ---
+
+.env
+*.pem
+*.key
+
+
+
+# --- IDE/Editor Settings ---
+
+.vscode/
+.idea/
