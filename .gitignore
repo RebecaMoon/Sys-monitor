@@ -1,22 +1,21 @@
 # --- Python Environments ---
-
 venv/
 .venv/
 env/
 *.pyc
 __pycache__/
+.pytest_cache/
+.mypy_cache/
 
 
 
 # --- OS Junk ---
-
 .DS_Store
 Thumbs.db
 
 
 
 # --- Security ---
-
 .env
 *.pem
 *.key
@@ -24,6 +23,10 @@ Thumbs.db
 
 
 # --- IDE/Editor Settings ---
-
 .vscode/
 .idea/
+
+
+
+# --- Logs ---
+*.log
