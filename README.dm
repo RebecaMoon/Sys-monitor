@@ -12,10 +12,12 @@ The system consists of three main services working together:
 2. **API:** A FastAPI-based backend that receives, validates, and stores incoming metrics.
 3. **Database:** A PostgreSQL instance for persistent storage of historical telemetry data.
 
+> This project also includes an alternative API implementation written in Go. The Go API works with the existing Python agent and stores metrics in the same PostgreSQL database.
 
 ## Technologies
 
 - **Backend:** Python (FastAPI)
+- **Backend alternative:** Go
 - **Monitoring:** Python (psutil)
 - **Database:** PostgreSQL
 - **Orchestration:** Docker
@@ -63,6 +65,12 @@ cd sys-monitor
 
 ```bash
 docker compose up -d --build
+```
+
+#### To run the Go API implementation instead, use:
+
+```bash
+docker compose -f compose.go.yml up -d --build
 ```
 
 ### 3. Install the monitoring agent
