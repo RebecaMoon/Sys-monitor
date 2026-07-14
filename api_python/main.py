@@ -3,12 +3,30 @@ from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 # To run this use: uvicorn main:app --reload
 
 import database # Import the database config and model.
 import models
+import os
+
+load_dotenv() # Load env variables from .env
+origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 models.Base.metadata.create_all(bind=database.engine) # It creates the tables if they don't exist.
 
