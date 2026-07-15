@@ -2,12 +2,31 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 # To run this use: uvicorn main:app --reload
 
 import database # Import the database config and model.
 import models
+import os
+
+load_dotenv() # Load env variables from .env
+origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 models.Base.metadata.create_all(bind=database.engine) # It creates the tables if they don't exist.
 
@@ -20,6 +39,13 @@ def get_db(): # This function manages the database sessions.
         db.close() # When the endpoint ends, it closes the connection.
 
 class SystemMetrics(BaseModel): # This function uses Pydantic to verify the data received from the agent, it checks that the data types are correct.
+    cpu_percent: float
+    memory_percent: float
+    disk_percent: float
+    timestamp: float
+
+class MetricResponse(BaseModel):  #This function will be the response model used in the metrics/latest endpoint.
+    id: int
     cpu_percent: float
     memory_percent: float
     disk_percent: float
@@ -63,3 +89,40 @@ def receive_metrics(metrics: SystemMetrics, db: Session = Depends(get_db)): # Th
         "status": "success",
         "database_id": db_metric.id
     }
+
+
+@app.get("/metrics/latest", response_model=MetricResponse)
+def get_latest_metrics(db: Session = Depends(get_db)):
+    latest_metric = (
+        db.query(models.MetricTable)
+        .order_by(models.MetricTable.id.desc())
+        .first()
+    )
+
+    if latest_metric is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No metrics available"
+        )
+
+    return {
+        "id": latest_metric.id,
+        "cpu_percent": latest_metric.cpu_percent,
+        "memory_percent": latest_metric.memory_percent,
+        "disk_percent": latest_metric.disk_percent,
+        "timestamp": latest_metric.timestamp,
+    }
+
+
+@app.get("/metrics/history", response_model=list[MetricResponse])
+def get_metrics_history(db: Session = Depends(get_db)):
+    metrics = (
+        db.query(models.MetricTable)
+        .order_by(models.MetricTable.id.desc())
+        .limit(25)
+        .all()
+    )
+
+    metrics.reverse()
+
+    return metrics

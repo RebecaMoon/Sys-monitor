@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build: ./frontend
+    container_name: sys_monitor_frontend
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - api
+
   api:
     build: ./api_python
     container_name: sys_monitor_api
@@ -8,6 +18,7 @@ services:
 
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
 
     depends_on:
       - database
