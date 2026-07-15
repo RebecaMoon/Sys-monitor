@@ -13,30 +13,18 @@ function App() {
   })
 
   async function fetchLatestMetric() {
-    const response = await fetch('http://localhost:8000/metrics/latest')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/metrics/latest`)
     const data = await response.json()
 
     setLatestMetric(data)
   }
-
-  useEffect(() => {
-    fetchLatestMetric()
-
-    const interval = setInterval(() => {
-      fetchLatestMetric()
-    }, 3000)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [])
 
 
   const [metricsHistory, setMetricsHistory] = useState([])
 
   async function fetchMetricsHistory() {
     try {
-      const response = await fetch("http://localhost:8000/metrics/history")
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/metrics/history`)
 
       if (!response.ok) {
         throw new Error("Failed to fetch metrics history")

@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build: ./frontend
+    container_name: sys_monitor_frontend
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - api
+
   api:
     build: ./api_python
     container_name: sys_monitor_api
