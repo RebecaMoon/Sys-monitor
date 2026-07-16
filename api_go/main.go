@@ -56,6 +56,48 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) { // This is the mos
 	json.NewEncoder(w).Encode(response) // Encode the response as JSON.
 }
 
+func latestMetricHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	metric, err := GetLatestMetric(r.Context())
+	if err != nil {
+		log.Println("Failed to retrieve latest metric:", err)
+
+		response := map[string]string{
+			"detail": "No metrics available",
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(response)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(metric)
+}
+
+func metricsHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	metrics, err := GetMetricsHistory(r.Context())
+	if err != nil {
+		log.Println("Failed to retrieve metrics history:", err)
+		http.Error(w, "Failed to retrieve metrics history", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(metrics)
+}
+
 func main() { // This is the main function.
 	err := ConnectDatabase()
 	if err != nil {
@@ -70,6 +112,8 @@ func main() { // This is the main function.
 
 	http.HandleFunc("/", healthHandler) // These two lines define the endpoints.
 	http.HandleFunc("/metrics", metricsHandler)
+	http.HandleFunc("/metrics/latest", latestMetricHandler)
+	http.HandleFunc("/metrics/history", metricsHistoryHandler)
 
 	port := "8000" // This is the server port.
 

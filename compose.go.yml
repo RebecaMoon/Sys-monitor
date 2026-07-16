@@ -1,5 +1,15 @@
 services:
-  api-go:
+  frontend:
+    build: ./frontend
+    container_name: sys_monitor_frontend
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - api
+
+  api:
     build: ./api_go
     container_name: sys_monitor_api_go
 
